@@ -9,7 +9,7 @@ public class RayCastManager : MonoBehaviour
     public float original = 0.5f;
     public float length = 0.0f;
 
-    public float laserSpeed = 0.0f;
+    [HideInInspector] public float laserSpeed = 0.0f;
     public float laserSize = 1.0f;
 
     float speedKeep = 0.0f;
@@ -28,6 +28,7 @@ public class RayCastManager : MonoBehaviour
     public float timer = 0.0f;
 
     public TextMeshProUGUI raySpeedTX;
+    public TextMeshProUGUI rayLengthTX;
     public TextMeshProUGUI enDestroyTX;
 
     bool mainGame;
@@ -38,6 +39,7 @@ public class RayCastManager : MonoBehaviour
         speedKeep = laserSpeed;
         sizeKeep = laserSize;
         raySpeedTX.text = laserSpeed.ToString("000.0");
+        rayLengthTX.text = length.ToString("000.0");
         enDestroyTX.text = enemyDestroy.ToString("000.0");
 
         cameraOrigin = chaseCamera.transform.position;
@@ -70,6 +72,8 @@ public class RayCastManager : MonoBehaviour
         Vector3 rayLength = new Vector3(length, 0, 0);
 
         var ray = new Ray(rayOrigin, rayLength);
+
+        rayLengthTX.text = laser.transform.localScale.y.ToString("0000.0");
 
         Debug.DrawRay(ray.origin, rayLength, Color.red, 10.0f, false);
 
