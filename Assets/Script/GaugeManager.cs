@@ -2,33 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Playables;
 
 public class GaugeManager : MonoBehaviour
 {
     //Main
-    GameManager gameManager;
+    static int levelkeep = 0;
+
     RayCastManager rayCast;
 
-    public GameObject[] activeCanvas;
+    private int gameNum = 0;
 
-    private int gameNum = 0; 
-
-    public float onceLap = 1.0f;
-    public float timelineDelay = 3.0f;
+    float onceLap = 1.0f;
+    float levelBonus = 1.0f;
 
     float fireTimer = 0.0f;
     float heartTimer = 0.0f;
 
     float result = 0.0f;
-    float delayTimer = 0.0f;
-
-    public PlayableDirector[] directors;
-    public GameObject[] timelines;
 
     bool gameOne, gameTwo;
-    bool mainGame;
-    bool count;
+    bool shot;
+    bool stop;
 
     //FireMove
     public GameObject effect;
@@ -54,7 +48,6 @@ public class GaugeManager : MonoBehaviour
         
     void Start()
     {
-        gameManager = GetComponent<GameManager>();
         rayCast = GetComponent<RayCastManager>();
 
         handXPos = new Vector3(-startX, -startY, 0);
@@ -63,32 +56,21 @@ public class GaugeManager : MonoBehaviour
         imageWidth = heartGauge.rectTransform.sizeDelta.x;
         imageHeight = heartGauge.rectTransform.sizeDelta.y;
 
-        mainGame = true;
         gameOne = true;
+
+        if (GameManager.Instance.reRoad)
+        {
+            GameLevel(levelkeep);
+        }
     }
    
     void Update()
     {
         width = Mathf.Clamp(width, 0, imageWidth);
         height = Mathf.Clamp(width, 0, imageHeight);
-
-        if(gameNum == 0)
-        {
-            gameManager.ActiveChange(1);
-            activeCanvas[1].SetActive(false);
-            activeCanvas[0].SetActive(true);
-        }
-        else if(gameNum == 1)
-        {
-            gameManager.ActiveChange(0);
-            activeCanvas[1].SetActive(true);
-            activeCanvas[0].SetActive(false);
-        }
         
-        if (mainGame)
+        if (GameManager.Instance.mainGame && !stop)
         {
-            GameStop();
-
             if (gameNum == 0)
             {
                 if (gameOne)
@@ -103,10 +85,12 @@ public class GaugeManager : MonoBehaviour
                     HeartGauge();
                 }
             }
+
+            GameStop();
         }
     }
 
-    void FireMove()
+    private void FireMove()
     {
         fireTimer += Time.deltaTime;
 
@@ -141,7 +125,7 @@ public class GaugeManager : MonoBehaviour
         }
     }
 
-    void HeartGauge()
+    private void HeartGauge()
     {
         heartTimer += Time.deltaTime;
 
@@ -155,7 +139,6 @@ public class GaugeManager : MonoBehaviour
         
         if(heartTimer > onceLap)
         {
-            Debug.Log(heartTimer);
             width = 0.0f;
             height = 0.0f;
 
@@ -171,52 +154,90 @@ public class GaugeManager : MonoBehaviour
         {
             if (gameNum == 0)
             {
-                count = true;
-
                 float distance = Mathf.Abs(fireImage.transform.position.x - handImage.transform.position.x) / 1200;
 
+                if(distance > 1)
+                {
+                    distance = 1;
+                }
+
                 result += 1 - distance;
+
                 gameOne = false;
 
-                timelines[0].SetActive(true);
-                directors[0].Play();
+                GameManager.Instance.PlayTimeline(2);
+
+                stop = true;
             }
             else if(gameNum == 1)
             {
-                count = true;
-
-                timelines[1].SetActive(true);
-                directors[1].Play();
+                GameManager.Instance.PlayTimeline(3);
 
                 gameTwo = false;
                 result += width / imageWidth;
+                Debug.Log(result);
+
+                stop = true;
             }
         }
+    }
 
-        if (count && gameNum == 0)
+    public void TimelineFinish()
+    {
+        if (gameNum == 0)
         {
-            delayTimer += Time.deltaTime;
+            gameNum = 1;
 
-            if (delayTimer >= timelineDelay)
-            {
-                gameNum = 1;
-                delayTimer = 0;
-                gameTwo = true;
-                count = false;
-            }
+            GameManager.Instance.CameraChange(2);
+            MainMenuManager.Instance.Transition_Menu(MainMenuManager.Instance.gameCanNum[1]);
+
+            stop = false;
+            heartGauge.enabled = true;
+            gameTwo = true;
         }
-        else if (count && gameNum == 1)
+        else if (gameNum == 1 && !shot)
         {
-            delayTimer += Time.deltaTime;
+            rayCast.laserSpeed = result * 100.0f * levelBonus;
+            Debug.Log(result);
 
-            if (delayTimer >= timelineDelay)
-            {
-                rayCast.laserSpeed = result * 100.0f;
-                rayCast.BeamCharge();
-                rayCast.ShotStart();
-                //Debug.Log(result + " " + width + " " + height);
-            }
+            rayCast.ShotStart();
 
+            shot = true;
+        }
+    }
+
+    public void GameLevel(int level)
+    {
+        if (!GameManager.Instance.reRoad)
+        {
+            levelkeep = level;
+        }
+
+        switch (levelkeep)
+        {
+            case 0:
+                onceLap = 1.5f;
+                levelBonus = 0.8f;
+
+                MainMenuManager.Instance.CanvasInit();
+                GameManager.Instance.PlayTimeline(0);
+                break;
+
+            case 1:
+                onceLap = 1.0f;
+                levelBonus = 1.0f;
+
+                MainMenuManager.Instance.CanvasInit();
+                GameManager.Instance.PlayTimeline(0);
+                break;
+
+            case 2:
+                onceLap = 0.5f;
+                levelBonus = 1.5f;
+
+                MainMenuManager.Instance.CanvasInit();
+                GameManager.Instance.PlayTimeline(0);
+                break;
         }
     }
 }
