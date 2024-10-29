@@ -31,12 +31,11 @@ public class RayCastManager : MonoBehaviour
     public TextMeshProUGUI rayLengthTX;
     public TextMeshProUGUI enDestroyTX;
 
-    bool mainGame;
-    bool start;
+    bool countStart;
+    bool shotStart;
 
     void Start()
     {
-        speedKeep = laserSpeed;
         sizeKeep = laserSize;
         raySpeedTX.text = laserSpeed.ToString("000.0");
         rayLengthTX.text = length.ToString("000.0");
@@ -48,18 +47,18 @@ public class RayCastManager : MonoBehaviour
 
     void Update()
     {
-        if (mainGame)
+        if (countStart)
         {
-            GameTimer();
+            LaserSlowDown();
 
-            if (start)
+            if (shotStart)
             {
                 GrowRay();
             }
         }
     }
 
-    void GrowRay()
+    private void GrowRay()
     {
         length += Time.deltaTime * laserSpeed;
 
@@ -73,6 +72,7 @@ public class RayCastManager : MonoBehaviour
 
         var ray = new Ray(rayOrigin, rayLength);
 
+        raySpeedTX.text = laserSpeed.ToString("000.0");
         rayLengthTX.text = laser.transform.localScale.y.ToString("0000.0");
 
         Debug.DrawRay(ray.origin, rayLength, Color.red, 10.0f, false);
@@ -94,35 +94,30 @@ public class RayCastManager : MonoBehaviour
         }
     }
 
-    void GameTimer()
+    private void LaserSlowDown()
     {
         timer += Time.deltaTime;
 
         if(timer <= finTime)
         {
-            start = true;
+            shotStart = true;
 
             if(timer + slowDownTime >= finTime)
             {
                 laserSize -= (sizeKeep / slowDownTime) * Time.deltaTime;
                 laserSpeed -= (speedKeep / slowDownTime) * Time.deltaTime;
-                //Debug.Log(laserSpeed);
             }
         }
         else if(timer > finTime)
         {
-            start = false;
+            shotStart = false;
+            GameManager.Instance.GameFinish();
         }
-    }
-
-    public void BeamCharge()
-    {
-        laserSpeed += 1.0f;
-        raySpeedTX.text = laserSpeed.ToString("000.0");
     }
 
     public void ShotStart()
     {
-        mainGame = true;
+        speedKeep = laserSpeed;
+        countStart = true;
     }
 }
