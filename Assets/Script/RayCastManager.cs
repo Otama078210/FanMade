@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class RayCastManager : MonoBehaviour
 {
+    [NonSerialized] public float levelBonus = 1.0f;
+
     public float original = 0.5f;
     public float length = 0.0f;
 
@@ -17,7 +20,8 @@ public class RayCastManager : MonoBehaviour
     [SerializeField] private float slowDownTime = 5.0f;
     [SerializeField] private float finTime = 10.0f;
 
-    int enemyDestroy = 0;
+    float lengthResult = 0.0f;
+    float enemyDestroy = 0.0f;
 
     Vector3 cameraOrigin;
     Vector3 laserOrigin;
@@ -27,9 +31,9 @@ public class RayCastManager : MonoBehaviour
 
     public float timer = 0.0f;
 
-    public TextMeshProUGUI raySpeedTX;
-    public TextMeshProUGUI rayLengthTX;
-    public TextMeshProUGUI enDestroyTX;
+    public TextMeshProUGUI totalTX;
+    public TextMeshProUGUI lengthTX;
+    public TextMeshProUGUI destroyTX;
 
     bool countStart;
     bool shotStart;
@@ -37,9 +41,10 @@ public class RayCastManager : MonoBehaviour
     void Start()
     {
         sizeKeep = laserSize;
-        raySpeedTX.text = laserSpeed.ToString("000.0");
-        rayLengthTX.text = length.ToString("000.0");
-        enDestroyTX.text = enemyDestroy.ToString("000.0");
+        laserSize = 0.0f;
+        totalTX.text = laserSpeed.ToString("000000");
+        lengthTX.text = length.ToString("00000");
+        destroyTX.text = enemyDestroy.ToString("00000");
 
         cameraOrigin = chaseCamera.transform.position;
         laserOrigin = laser.transform.position;
@@ -47,6 +52,10 @@ public class RayCastManager : MonoBehaviour
 
     void Update()
     {
+        laserSize = Mathf.Clamp(laserSize, 0, sizeKeep);
+        lengthResult = Mathf.Clamp(lengthResult, 0, 99999);
+        enemyDestroy = Mathf.Clamp(enemyDestroy, 0, 99999);
+
         if (countStart)
         {
             LaserSlowDown();
@@ -62,6 +71,11 @@ public class RayCastManager : MonoBehaviour
     {
         length += Time.deltaTime * laserSpeed;
 
+        if(timer <= 1)
+        {
+            laserSize += Time.deltaTime * sizeKeep * 2;
+        }
+
         laser.transform.position = new Vector3(length / 2, laserOrigin.y, laserOrigin.z);
         laser.transform.localScale = new Vector3(laserSize, length / 2, laserSize);
 
@@ -72,8 +86,8 @@ public class RayCastManager : MonoBehaviour
 
         var ray = new Ray(rayOrigin, rayLength);
 
-        raySpeedTX.text = laserSpeed.ToString("000.0");
-        rayLengthTX.text = laser.transform.localScale.y.ToString("0000.0");
+        lengthResult = laser.transform.localScale.y * 100 * levelBonus;
+        lengthTX.text = lengthResult.ToString("00000");
 
         Debug.DrawRay(ray.origin, rayLength, Color.red, 10.0f, false);
 
@@ -85,13 +99,20 @@ public class RayCastManager : MonoBehaviour
 
             if(tag == "Enemy")
             {
-                enemyDestroy += 1;
-                enDestroyTX.text = enemyDestroy.ToString("000.0");
+                Vector3 generatePos = hit.collider.gameObject.transform.position;
+                generatePos.y = 1;
+
+                Instantiate(EffectManager.Instance.otherFX[0], generatePos, Quaternion.identity);
+
+                enemyDestroy += 1000 * levelBonus;
+                destroyTX.text = enemyDestroy.ToString("00000");
 
                 Destroy(hit.collider.gameObject);
                 Debug.Log(enemyDestroy);
             }
         }
+
+        totalTX.text = (lengthResult + enemyDestroy).ToString("000000");
     }
 
     private void LaserSlowDown()
@@ -108,7 +129,7 @@ public class RayCastManager : MonoBehaviour
                 laserSpeed -= (speedKeep / slowDownTime) * Time.deltaTime;
             }
         }
-        else if(timer > finTime)
+        else if(timer > finTime && shotStart)
         {
             shotStart = false;
             GameManager.Instance.GameFinish();

@@ -4,11 +4,12 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.UI;
 using System;
+using UnityEngine.EventSystems;
 
 public class GameManager : Singleton<GameManager>
 {
     static int reRoadCheck = 0;
-    [NonSerialized] public bool reRoad = false;
+    [NonSerialized] public bool reLoad = false;
 
     public GameObject[] cameras;
 
@@ -20,44 +21,38 @@ public class GameManager : Singleton<GameManager>
     [NonSerialized] public bool mainGame = false;
     bool skip = false;
 
-    public float gameSpeed = 1.0f;
+    [NonSerialized] public float gameSpeed = 1.0f;
+
+    bool pose = false;
 
     void Start()
     {
+        TimeControl(1);
+
+        Debug.Log(reRoadCheck);
+
         if(reRoadCheck <= 0)
         {
-            reRoad = false;
+            ReStart(0);
         }
-        else
+        else if(reRoadCheck == 1)
         {
-            reRoad = true;
+            ReStart(1);
         }
-
-        if(!reRoad)
+        else if (reRoadCheck == 2)
         {
-            TimelineInit();
-            CameraChange(0);
+            ReStart(2);
         }
-        else
+        else if (reRoadCheck == 3)
         {
-            TimelineInit();
-            CameraChange(1);
-
-            PlayTimeline(0);
-
-            if (directors[0].state == PlayState.Playing)
-            {
-                directors[0].time = 4;
-            }
-
-            PlayTimeline(1);
+            ReStart(3);
         }
     }
 
     void Update()
     {
         DemoSkip();
-        TimeControl();
+        Pose();
     }
 
     public void CameraChange(int cameraNum)
@@ -89,6 +84,12 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    public void TutorialStart()
+    {
+        MainMenuManager.Instance.CanvasInit();
+        PlayTimeline(0);
+    }
+
     public void Tutorial()
     {
         MainMenuManager.Instance.Transition_Menu(MainMenuManager.Instance.tutorialCanNum);
@@ -110,6 +111,25 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    void Pose()
+    {
+        if(!pose && mainGame && Input.GetKeyDown(KeyCode.Escape))
+        {
+            TimeControl(0);
+            MainMenuManager.Instance.canvas[9].SetActive(true);
+            EventSystem.current.SetSelectedGameObject(MainMenuManager.Instance.focusObject[9]);
+
+            pose = true;
+        }
+        else if (pose && mainGame && Input.GetKeyDown(KeyCode.Escape))
+        {
+            TimeControl(1);
+            MainMenuManager.Instance.canvas[9].SetActive(false);
+
+            pose = false;
+        }
+    }
+
     public void GameStart()
     {
         mainGame = true;
@@ -121,18 +141,92 @@ public class GameManager : Singleton<GameManager>
     public void GameFinish()
     {
         mainGame = false;
+        PlayTimeline(5);
 
-        MainMenuManager.Instance.Transition_Menu(7);
+        MainMenuManager.Instance.canvas[6].SetActive(true);
+        EventSystem.current.SetSelectedGameObject(MainMenuManager.Instance.focusObject[6]);
     }
 
-    public void SceneReset()
+    public void SceneReLoad(int select)
     {
-        reRoadCheck += 1;
-        FadeManager.Instance.LoadScene("MainScene", 1);
+        switch (select)
+        {
+            case 0:
+                break;
+
+            case 1:
+                reRoadCheck = 1;
+                FadeManager.Instance.LoadScene("MainScene", 1);
+                break;
+
+            case 2:
+                reRoadCheck = 2;
+                FadeManager.Instance.LoadScene("MainScene", 1);
+                break;
+
+            case 3:
+                reRoadCheck = 3;
+                FadeManager.Instance.LoadScene("MainScene", 1);
+                break;
+        }
     }
 
-    void TimeControl()
+    void ReStart(int select)
     {
+        switch (select)
+        {
+            case 0:
+                TimelineInit();
+                CameraChange(0);
+                break;
+
+            case 1:
+                reLoad = true;
+
+                MainMenuManager.Instance.CanvasInit();
+
+                TimelineInit();
+                CameraChange(1);
+
+                PlayTimeline(0);
+
+                if (directors[0].state == PlayState.Playing)
+                {
+                    directors[0].time = 4;
+                }
+
+                PlayTimeline(1);
+                break;
+
+            case 2:
+                reLoad = true;
+
+                TimelineInit();
+                CameraChange(0);
+
+                MainMenuManager.Instance.CanvasInit();
+
+                MainMenuManager.Instance.canvas[0].SetActive(true);
+                EventSystem.current.SetSelectedGameObject(MainMenuManager.Instance.focusObject[0]);
+                break;
+
+            case 3:
+                reLoad = true;
+
+                TimelineInit();
+                CameraChange(0);
+
+                MainMenuManager.Instance.CanvasInit();
+
+                MainMenuManager.Instance.canvas[1].SetActive(true);
+                EventSystem.current.SetSelectedGameObject(MainMenuManager.Instance.focusObject[1]);
+                break;
+        }
+    }
+
+    public void TimeControl(float speedChange)
+    {
+        gameSpeed = speedChange;
         Time.timeScale = gameSpeed;
     }
 }

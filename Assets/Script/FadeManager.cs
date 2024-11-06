@@ -60,7 +60,7 @@ public class FadeManager : Singleton<FadeManager>
 		while (time <= interval)
         {
 			fadeAlpha = Mathf.Lerp (0f, 1f, time / interval);
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
 			yield return null;
 		}
 
@@ -72,7 +72,7 @@ public class FadeManager : Singleton<FadeManager>
 		while (time <= interval)
         {
 			fadeAlpha = Mathf.Lerp (1f, 0f, time / interval);
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
 			yield return null;
 		}
 

@@ -7,9 +7,9 @@ using System;
 
 public class MainMenuManager : Singleton<MainMenuManager>
 {
-    [SerializeField] GameObject[] canvas;
+    public GameObject[] canvas;
 
-    [SerializeField] GameObject[] focusObject;
+    public GameObject[] focusObject;
 
     GameObject currentFocus;
     GameObject previousFocus;
@@ -19,15 +19,15 @@ public class MainMenuManager : Singleton<MainMenuManager>
 
     void Start()
     {
-        if (!GameManager.Instance.reRoad)
+        if (!GameManager.Instance.reLoad)
         {
+            GameCanvasCheck();
+
             CanvasInit();
 
             canvas[0].SetActive(true);
 
             EventSystem.current.SetSelectedGameObject(focusObject[0]);
-
-            GameCanvasCheck();
         }
         else
         {
@@ -40,7 +40,6 @@ public class MainMenuManager : Singleton<MainMenuManager>
         FocusCheck();
     }
 
-
     void GameCanvasCheck()
     {
         for (int i = 0; i < canvas.Length; i++)
@@ -49,6 +48,8 @@ public class MainMenuManager : Singleton<MainMenuManager>
             {
                 Array.Resize(ref gameCanNum, gameCanNum.Length + 1);
                 gameCanNum[gameCanNum.Length - 1] = i;
+
+                Debug.Log(gameCanNum[gameCanNum.Length - 1]);
             }
         }
 

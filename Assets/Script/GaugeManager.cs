@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class GaugeManager : MonoBehaviour
 {
@@ -13,7 +14,6 @@ public class GaugeManager : MonoBehaviour
     private int gameNum = 0;
 
     float onceLap = 1.0f;
-    float levelBonus = 1.0f;
 
     float fireTimer = 0.0f;
     float heartTimer = 0.0f;
@@ -58,7 +58,7 @@ public class GaugeManager : MonoBehaviour
 
         gameOne = true;
 
-        if (GameManager.Instance.reRoad)
+        if (GameManager.Instance.reLoad)
         {
             GameLevel(levelkeep);
         }
@@ -197,10 +197,9 @@ public class GaugeManager : MonoBehaviour
         }
         else if (gameNum == 1 && !shot)
         {
-            rayCast.laserSpeed = result * 100.0f * levelBonus;
-            Debug.Log(result);
+            GameManager.Instance.PlayTimeline(4);
 
-            rayCast.ShotStart();
+            rayCast.laserSpeed = result * 130.0f;
 
             shot = true;
         }
@@ -208,35 +207,23 @@ public class GaugeManager : MonoBehaviour
 
     public void GameLevel(int level)
     {
-        if (!GameManager.Instance.reRoad)
-        {
-            levelkeep = level;
-        }
-
+        levelkeep = level;
+        
         switch (levelkeep)
         {
             case 0:
                 onceLap = 1.5f;
-                levelBonus = 0.8f;
-
-                MainMenuManager.Instance.CanvasInit();
-                GameManager.Instance.PlayTimeline(0);
+                rayCast.levelBonus = 1.0f;
                 break;
 
             case 1:
                 onceLap = 1.0f;
-                levelBonus = 1.0f;
-
-                MainMenuManager.Instance.CanvasInit();
-                GameManager.Instance.PlayTimeline(0);
+                rayCast.levelBonus = 1.2f;
                 break;
 
             case 2:
                 onceLap = 0.5f;
-                levelBonus = 1.5f;
-
-                MainMenuManager.Instance.CanvasInit();
-                GameManager.Instance.PlayTimeline(0);
+                rayCast.levelBonus = 1.5f;
                 break;
         }
     }
