@@ -11,6 +11,8 @@ public class MainMenuManager : Singleton<MainMenuManager>
 
     public GameObject[] focusObject;
 
+    public GameObject[] explanation;
+
     GameObject currentFocus;
     GameObject previousFocus;
 
@@ -38,6 +40,12 @@ public class MainMenuManager : Singleton<MainMenuManager>
     void Update()
     {
         FocusCheck();
+        SelectBttonCheck();
+
+        if (GameManager.Instance.mainGame)
+        {
+            canvas[9].SetActive(true);
+        }
     }
 
     void GameCanvasCheck()
@@ -95,6 +103,38 @@ public class MainMenuManager : Singleton<MainMenuManager>
         }
 
         previousFocus = EventSystem.current.currentSelectedGameObject;
+    }
+
+    void SelectBttonCheck()
+    {
+        GameObject current = EventSystem.current.currentSelectedGameObject;
+
+        if (current.transform.name == "Easy")
+        {
+            ExplanationInit();
+            explanation[0].SetActive(true);
+        }       
+        else if(current.transform.name == "Normal")
+        {
+            ExplanationInit();
+            explanation[1].SetActive(true);
+        }
+        else if (current.transform.name == "Hard")
+        {
+            ExplanationInit();
+            explanation[2].SetActive(true);
+        }
+        else
+        {
+        }
+    }
+
+    void ExplanationInit()
+    {
+        for (int i = 0; i < explanation.Length; i++)
+        {
+            explanation[i].SetActive(false);
+        }
     }
 
     public void Quit()

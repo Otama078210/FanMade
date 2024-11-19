@@ -6,33 +6,28 @@ using SaveData_Settings;
 public class SoundManager : Singleton<SoundManager>
 {
     [Header("音量コントロールのMixer")]
-    [SerializeField] public AudioMixer mixer;   //音量をコントロールする
+    [SerializeField] public AudioMixer mixer;
     [SerializeField, Label("Masterグループ")] public AudioMixerGroup MasterGroup;
     [SerializeField, Label("BGMグループ")] public AudioMixerGroup BGMGroup;
     [SerializeField, Label("SEグループ")] public AudioMixerGroup SEGroup;
     [Space(10)]
-    //各カテゴリごとにAudioClipを入れる変数を配列で用意
+
     public AudioClip[] bgmClip;
     public AudioClip[] se_SysClip;
     public AudioClip[] se_GameClip;
 
-    //各音声用のAudioSourceを用意する
     [System.NonSerialized] public AudioSource BGMSource;
     [System.NonSerialized] public AudioSource SE_SysSource;
     [System.NonSerialized] public AudioSource[] SE_GameSource;
 
-    //音量の段階（SliderのValueで設定）
     float[] vol_BGM = {-80f,-30f,-27,-24f,-21f,-18f,-15f,-12.5f,-10f,-7.5f,-5f };
     float[] vol_SE  = {-80f, -14f, -12f, -9f, -7f, -5f, -3f, -1f, 1f, 3f, 5f };
 
-    //フェード用に音量を保持
     float bgmVol;
 
-
-    //シーン開始直後（Startメソッドより早く）に処理
     void Awake()
     {
-        Load.Audio(); //保存された音量をロード
+        Load.Audio();
 
         //AddComponentでAudioSourceを追加、ループ設定、優先度、MixerGroupの設定
         //BGM
@@ -65,28 +60,23 @@ public class SoundManager : Singleton<SoundManager>
         }
     }
 
-    //BGMを外部から呼び出す時
     public void PlayBGM(int i)
     {
         BGMSource.clip = bgmClip[i];
         BGMSource.Play();
     }
 
-    //SytemSEを外部から呼び出す時
     public void PlaySE_Sys(int i)
     {
         SE_SysSource.clip = se_SysClip[i];
         SE_SysSource.Play();
     }
 
-    //GameSEを外部から呼び出す時
     public void PlaySE_Game(int i)
     {
         SE_GameSource[i].Play();
     }
 
-    //Silderによる音量の調整
-    //（第1引数でBGM、第2引数でSEのボリューム）
     public void VolumeChange(int vol1,int vol2)
     {
         mixer.SetFloat("BGVol", vol_BGM[vol1]);
@@ -95,8 +85,6 @@ public class SoundManager : Singleton<SoundManager>
         bgmVol = vol_BGM[vol1];
     }
 
-    //画面がフェードアウトする時
-    //音量も一緒にフェードアウト フェードするのはBGMのみ
     public IEnumerator FadeOut(float interval)
     {
         float time = 0;
@@ -109,8 +97,6 @@ public class SoundManager : Singleton<SoundManager>
         }
     }
 
-    //画面がフェードアウトする時
-    //音量も一緒にフェードイン
     public IEnumerator FadeIn(float interval)
     {
         float time = 0;

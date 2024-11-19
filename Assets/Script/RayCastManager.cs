@@ -17,8 +17,8 @@ public class RayCastManager : MonoBehaviour
 
     float speedKeep = 0.0f;
     float sizeKeep = 0.0f;
-    [SerializeField] private float slowDownTime = 5.0f;
-    [SerializeField] private float finTime = 10.0f;
+    public float slowDownTime = 5.0f;
+    public float finTime = 10.0f;
 
     float lengthResult = 0.0f;
     float enemyDestroy = 0.0f;
@@ -32,10 +32,10 @@ public class RayCastManager : MonoBehaviour
     public float timer = 0.0f;
 
     public TextMeshProUGUI totalTX;
-    public TextMeshProUGUI lengthTX;
+    public TextMeshProUGUI[] lengthTX;
     public TextMeshProUGUI destroyTX;
 
-    bool countStart;
+    [NonSerialized] public bool countStart;
     bool shotStart;
 
     void Start()
@@ -43,7 +43,8 @@ public class RayCastManager : MonoBehaviour
         sizeKeep = laserSize;
         laserSize = 0.0f;
         totalTX.text = laserSpeed.ToString("000000");
-        lengthTX.text = length.ToString("00000");
+        lengthTX[0].text = length.ToString("00000");
+        lengthTX[1].text = length.ToString("0000.0");
         destroyTX.text = enemyDestroy.ToString("00000");
 
         cameraOrigin = chaseCamera.transform.position;
@@ -87,7 +88,9 @@ public class RayCastManager : MonoBehaviour
         var ray = new Ray(rayOrigin, rayLength);
 
         lengthResult = laser.transform.localScale.y * 100 * levelBonus;
-        lengthTX.text = lengthResult.ToString("00000");
+
+        lengthTX[0].text = lengthResult.ToString("00000");
+        lengthTX[1].text = laser.transform.localScale.y.ToString("0000.0");
 
         Debug.DrawRay(ray.origin, rayLength, Color.red, 10.0f, false);
 

@@ -84,15 +84,14 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-    public void TutorialStart()
+    public void DemoStart()
     {
-        MainMenuManager.Instance.CanvasInit();
         PlayTimeline(0);
     }
 
-    public void Tutorial()
+    public void DemoFinish()
     {
-        MainMenuManager.Instance.Transition_Menu(MainMenuManager.Instance.tutorialCanNum);
+        PlayTimeline(1);
         skip = false;
     }
 
@@ -116,15 +115,15 @@ public class GameManager : Singleton<GameManager>
         if(!pose && mainGame && Input.GetKeyDown(KeyCode.Escape))
         {
             TimeControl(0);
-            MainMenuManager.Instance.canvas[9].SetActive(true);
-            EventSystem.current.SetSelectedGameObject(MainMenuManager.Instance.focusObject[9]);
+            MainMenuManager.Instance.canvas[8].SetActive(true);
+            ButtonFocus(8);
 
             pose = true;
         }
         else if (pose && mainGame && Input.GetKeyDown(KeyCode.Escape))
         {
             TimeControl(1);
-            MainMenuManager.Instance.canvas[9].SetActive(false);
+            MainMenuManager.Instance.canvas[8].SetActive(false);
 
             pose = false;
         }
@@ -144,7 +143,11 @@ public class GameManager : Singleton<GameManager>
         PlayTimeline(5);
 
         MainMenuManager.Instance.canvas[6].SetActive(true);
-        EventSystem.current.SetSelectedGameObject(MainMenuManager.Instance.focusObject[6]);
+    }
+
+    public void ButtonFocus(int focusNum)
+    {
+        EventSystem.current.SetSelectedGameObject(MainMenuManager.Instance.focusObject[focusNum]);
     }
 
     public void SceneReLoad(int select)
