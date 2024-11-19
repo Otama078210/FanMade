@@ -45,7 +45,15 @@ public class GaugeManager : MonoBehaviour
 
     float imageWidth = 0.0f;
     float imageHeight = 0.0f;
-        
+
+    //PowerGauge
+    public Image powerGauge;
+    float growUpTimer = 0.0f;
+    float growUpFinTime = 0.5f;
+    float resultPower = 0.0f;
+
+    bool gaugeUpStart;
+
     void Start()
     {
         rayCast = GetComponent<RayCastManager>();
@@ -88,9 +96,11 @@ public class GaugeManager : MonoBehaviour
 
             GameStop();
         }
+
+        PowerGauge();
     }
 
-    private void FireMove()
+    void FireMove()
     {
         fireTimer += Time.deltaTime;
 
@@ -125,7 +135,7 @@ public class GaugeManager : MonoBehaviour
         }
     }
 
-    private void HeartGauge()
+    void HeartGauge()
     {
         heartTimer += Time.deltaTime;
 
@@ -148,7 +158,7 @@ public class GaugeManager : MonoBehaviour
         }
     }
 
-    private void GameStop()
+    void GameStop()
     {
         if (Input.GetButtonDown("Stop"))
         {
@@ -162,6 +172,9 @@ public class GaugeManager : MonoBehaviour
                 }
 
                 result += 1 - distance;
+
+                resultPower = 1 - distance;
+                gaugeUpStart = true;
 
                 gameOne = false;
 
@@ -177,7 +190,36 @@ public class GaugeManager : MonoBehaviour
                 result += width / imageWidth;
                 Debug.Log(result);
 
+                resultPower = width / imageWidth;
+                gaugeUpStart = true;
+
                 stop = true;
+            }
+        }
+    }
+
+    void PowerGauge()
+    {
+        if (gaugeUpStart)
+        {
+            growUpTimer += Time.deltaTime;
+
+            if (growUpTimer <= growUpFinTime)
+            {
+                powerGauge.fillAmount += ((resultPower / growUpFinTime) / 2) * Time.deltaTime;
+            }
+            else
+            {
+                growUpTimer = 0.0f;
+                gaugeUpStart = false;
+            }
+        }
+
+        if (rayCast.countStart)
+        {
+            if (rayCast.timer <= rayCast.finTime)
+            {
+                powerGauge.fillAmount -= ((result / rayCast.finTime) / 2) * Time.deltaTime;
             }
         }
     }
@@ -212,13 +254,13 @@ public class GaugeManager : MonoBehaviour
         switch (levelkeep)
         {
             case 0:
-                onceLap = 1.5f;
+                onceLap = 1.0f;
                 rayCast.levelBonus = 1.0f;
                 break;
 
             case 1:
-                onceLap = 1.0f;
-                rayCast.levelBonus = 1.2f;
+                onceLap = 0.75f;
+                rayCast.levelBonus = 1.25f;
                 break;
 
             case 2:
