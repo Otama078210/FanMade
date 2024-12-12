@@ -77,8 +77,8 @@ public class RayCastManager : MonoBehaviour
             laserSize += Time.deltaTime * sizeKeep * 2;
         }
 
-        laser.transform.position = new Vector3(length / 2, laserOrigin.y, laserOrigin.z);
-        laser.transform.localScale = new Vector3(laserSize, length / 2, laserSize);
+        laser.transform.position = new Vector3(length, laserOrigin.y, laserOrigin.z);
+        laser.transform.localScale = new Vector3(laserSize, laserSize, laserSize);
 
         chaseCamera.transform.position = new Vector3(length, cameraOrigin.y, cameraOrigin.z);
 
@@ -87,10 +87,10 @@ public class RayCastManager : MonoBehaviour
 
         var ray = new Ray(rayOrigin, rayLength);
 
-        lengthResult = laser.transform.localScale.y * 100 * levelBonus;
+        lengthResult = length * 100 * levelBonus;
 
         lengthTX[0].text = lengthResult.ToString("00000");
-        lengthTX[1].text = laser.transform.localScale.y.ToString("0000.0");
+        lengthTX[1].text = length.ToString("0000.0");
 
         Debug.DrawRay(ray.origin, rayLength, Color.red, 10.0f, false);
 
@@ -112,6 +112,11 @@ public class RayCastManager : MonoBehaviour
 
                 Destroy(hit.collider.gameObject);
                 Debug.Log(enemyDestroy);
+            }
+
+            if(tag == "SpeedChange")
+            {
+                GameManager.Instance.TimeControl(0);
             }
         }
 
